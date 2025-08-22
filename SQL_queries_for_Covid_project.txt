@@ -1,0 +1,42 @@
+					-- SOME ADVANCED QUERIES --
+
+SELECT * FROM public.covid_data1
+ORDER BY id ASC 
+
+-- Show countries where population_density > 1000 and positive_rate > 0.2. --
+
+select location,population_density,positive_rate 
+from covid_data1
+where population_density >1000 and positive_rate > 0.2;
+
+-- Rank all continents by total_tests_per_thousand. --
+
+select continent,avg(total_tests_per_thousand) as avg_tests,
+dense_rank() over(order by avg(total_tests_per_thousand) desc)
+from covid_data1 
+where continent is not null
+group by continent;
+
+-- Which countries reported data on handwashing_facilities but have extreme_poverty > 20? --
+
+select distinct location,handwashing_facilities,extreme_poverty from covid_data1
+where handwashing_facilities is not null 
+and extreme_poverty > 20
+order by extreme_poverty;
+
+-- For each continent, rank countries by total_cases_per_million. --
+
+select distinct continent,location,max(total_cases_per_million), 
+dense_rank() over(partition by continent order by max(total_cases_per_million) desc)
+as countries_ranking_by_total_cases
+from covid_data1
+group by continent,location
+order by continent,countries_ranking_by_total_cases;
+
+-- Show the date when each country first crossed 1,000 total_cases. --
+
+select location,min(date) first_thousand_dates
+from covid_data1
+where total_cases >= 1000
+group by location
+order by first_thousand_dates;
